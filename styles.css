@@ -4,12 +4,64 @@ input:focus {box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0
 
 input, button {outline: none;}
 
+body {
+  background: #37474f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
 input {
   margin: 8px;
   padding: 8px;
   border: none; 
   font-size: 18px;
   border-bottom: 1px solid #ccc;
+}
+
+.container {
+  padding: 48px 24px;
+}
+
+#buttons {
+  color: #fff;
+  text-align: center;
+}
+
+#login-container {
+  text-align: center;
+  color: #fff;
+}
+
+#login-link {
+  border: none;
+  background: #32c3a2;
+  color: #fff;
+  border-radius: 50px;
+  font-size: 2em;
+  padding: 8px 28px;
+}
+
+#query {
+  margin: 0;
+  border: none;
+  font-size: 24px;
+  
+}
+
+#search-button {
+  border: none;
+  background: #fff;
+  color: #ccc;
+  font-size: 24px;
+  padding: 8px;
+  border-left: 1px solid #ccc;
+}
+
+#search-button:hover {
+  box-shadow: 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12), 0 2px 4px -1px rgba(0,0,0,0.3);
+  color: #32c3a2;
 }
 
 #all-videos {
@@ -33,6 +85,7 @@ input {
 
 .video-title {
   padding-top: 8px;
+  color: white;
 }
 
 #live-video {
@@ -58,19 +111,21 @@ input {
 
 .search-msg {
   margin: 8px;
+  color: #fff;
 }
 
 .search-msg-timestamp {
   margin-right: 8px;
-  color: #999;
+  color: #ccc;
 }
 
 .back-btn {
-  border: 1px solid #000;
-  padding: 4px 16px;
+  border: 1px solid #9267ff;
+  padding: 8px 24px;
   font-size: 18px;
-  background: #000;
+  background: #9267ff;
   color: #fff;
   margin: 8px;
+  border-radius: 50px;
 }
 

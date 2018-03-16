@@ -2,17 +2,24 @@
 <html>
   <head>
     <title>Youtube Live Videos</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="./styles.css">
     <meta name="google-signin-scope" content="profile email">
     <meta name="google-signin-client_id" content="607353347851-g5fkpmdeqq4kkm25v44e5gcntunoolrr.apps.googleusercontent.com">
     <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
   <body>
-    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
-    <a href="#" onclick="signOut();">Sign out</a>
+    <div id="login-container" class="pre-auth"> 
+      <h1>Join a Youtube Live Stream</h1>
+      <button id="login-link">Sign In with Google</button> 
+      <h2>To get started</h2>
+    </div>
 
     <div id="container">
-      <div class='login'></div>
+      <div id=user-info></div>
+      <div id="buttons">
+        <h1>Search for live streaming videos</h1>
+        <input id="query" value='Gaming' type="text"/><button id="search-button" disabled onclick="getVideos()">Search</button>
+      </div>
       <div id="all-videos"></div>
       <div id="live-video"></div>
     </div>

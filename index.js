@@ -1,38 +1,33 @@
 let chatData = [];
 
+$().ready(() => {
+  $('#buttons').hide();
+});
+
 // After the API loads, call a function to enable the search box.
 function handleAPILoaded() {
-  getVideos();
+  $('#search-button').attr('disabled', false);
+  $('#buttons').show();
 }
 
 // Search for a specified string.
 function getVideos() {
 
-  fetch('https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&maxResults=25&order=relevance&type=video&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg', {
-    headers: {
-      "Accept": "application/json"
-    },
-    method: 'GET'
-  }).then(response => response.json())
-  .then(videos => {
-    videos.items.forEach(v => {
-      buildVideo(v);
-    });
+  var q = $('#query').val();
+  var request = gapi.client.youtube.search.list({
+    q: q, 
+    eventType: 'live',
+    maxResults: '25',
+    type: 'video',
+    part: 'snippet'
   });
-  // var request = gapi.client.youtube.search.list({
-  //   q: '',
-  //   eventType: 'live',
-  //   maxResults: '25',
-  //   type: 'video',
-  //   part: 'snippet'
-  // });
 
-  // request.execute(response => {
-  //   const videos = response.result.items;
-  //   videos.forEach(v => {
-  //     buildVideo(v);
-  //   })
-  // });
+  request.execute(response => {
+    const videos = response.result.items;
+    videos.forEach(v => {
+      buildVideo(v);
+    })
+  });
 }
 
 function getLiveChat(videoId) {
@@ -93,6 +88,7 @@ function getLiveChat(videoId) {
 
 function handleClick(videoId) {
   $('#all-videos').hide();
+  $('#buttons').hide();
   $('#live-video').show();
 
   let frameContainer = $('<div>').addClass('embed-video');
