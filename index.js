@@ -12,7 +12,6 @@ function handleAPILoaded() {
 
 // Search for a specified string.
 function getVideos() {
-
   var q = $('#query').val();
   var request = gapi.client.youtube.search.list({
     q: q, 
@@ -28,62 +27,80 @@ function getVideos() {
       buildVideo(v);
     })
   });
+
 }
 
 function getLiveChat(videoId) {
-  fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
-    headers: {
-      "Accept": "application/json"
-    },
-    method: 'GET'
-  }).then(response => response.json())
-  .then(video => {
-    const v = video.items[0];
-    const chatId = v.liveStreamingDetails.activeLiveChatId;
+  // fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
+  //   headers: {
+  //     "Accept": "application/json"
+  //   },
+  //   method: 'GET'
+  // }).then(response => response.json())
+  // .then(video => {
+  //   const v = video.items[0];
+  //   const chatId = v.liveStreamingDetails.activeLiveChatId;
     
-    fetch(`https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${chatId}&part=snippet&fields=items(snippet(authorChannelId%2CdisplayMessage%2CpollEditedDetails%2CpollOpenedDetails%2CpollVotedDetails%2CpublishedAt%2CsuperChatDetails%2CtextMessageDetails%2Ctype%2CuserBannedDetails))&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
-      headers: {
-        "Accept": "application/json"
-      },
-      method: 'GET'
-    }).then(response => response.json())
-    .then(chat => {
-      chat.items.forEach(item => {
-        chatData.push(item.snippet);
-      })
-      chat.items.forEach((item,i) => {
-        fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${item.snippet.authorChannelId}&fields=items(id%2Csnippet%2Ftitle)&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
-          headers: {
-            "Accept": "application/json"
-          },
-          method: 'GET'
-        }).then(response => response.json())
-        .then(channel => {
-          chatData[i].channelName = channel.items[0].snippet.title;
-        })
-      })
-      console.log(chatData[0]);
+  //   fetch(`https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${chatId}&part=snippet&fields=items(snippet(authorChannelId%2CdisplayMessage%2CpollEditedDetails%2CpollOpenedDetails%2CpollVotedDetails%2CpublishedAt%2CsuperChatDetails%2CtextMessageDetails%2Ctype%2CuserBannedDetails))&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
+  //     headers: {
+  //       "Accept": "application/json"
+  //     },
+  //     method: 'GET'
+  //   }).then(response => response.json())
+  //   .then(chat => {
+  //     chat.items.forEach(item => {
+  //       chatData.push(item.snippet);
+  //     })
+  //     chat.items.forEach((item,i) => {
+  //       fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${item.snippet.authorChannelId}&fields=items(id%2Csnippet%2Ftitle)&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
+  //         headers: {
+  //           "Accept": "application/json"
+  //         },
+  //         method: 'GET'
+  //       }).then(response => response.json())
+  //       .then(channel => {
+  //         chatData[i].channelName = channel.items[0].snippet.title;
+  //       })
+  //     })
+  //     console.log(chatData[0]);
       
-    })
-  })
-
-  // const requestId = gapi.client.youtube.videos.list({
-  //   id: videoId,
-  //   part: "liveStreamingDetails"
-  // });
-
-  // requestId.execute(response => {
-  //   const video = response.items[0];
-  //   const requestChat = gapi.client.youtube.liveChatMessages.list({
-  //     liveChatId: video.liveStreamingDetails.activeLiveChatId,
-  //     part: "snippet"
-  //   });
-  //   requestChat.execute(response => {
-  //     console.log(response.items);
-      
-  //     // buildChat(response.items);
   //   })
   // })
+
+  const requestId = gapi.client.youtube.videos.list({
+    id: videoId,
+    part: "liveStreamingDetails"
+  });
+
+  requestId.execute(response => {
+    const video = response.items[0];
+    const requestChat = gapi.client.youtube.liveChatMessages.list({
+      liveChatId: video.liveStreamingDetails.activeLiveChatId,
+      part: "snippet"
+    });
+    requestChat.execute(response => {
+      response.items.forEach(item => {
+        chatData.push(item.snippet);
+      });
+      response.items.forEach((item, i) => {
+        const requestChannelName = gapi.client.youtube.channels.list({
+          id: item.snippet.authorChannelId,
+          part: "snippet"
+        });
+        requestChannelName.execute(response => {
+          chatData[i].channelName = response.items[0].snippet.title;
+        });
+      })
+      console.log(chatData[1]);
+      
+
+      // buildChat(response.items);
+    })
+  })
+}
+
+function buildChat(chat) {
+
 }
 
 function handleClick(videoId) {
@@ -112,6 +129,7 @@ function handleClick(videoId) {
     .text('Back');
     back.on('click', () => {
       $('#live-video').empty();
+      $('#buttons').show();
       $('#live-video').hide();
       $('#all-videos').show();
     });
@@ -162,8 +180,6 @@ function buildSearchResult(searchResults) {
 
 
 function buildVideo(v) {
-  console.log('building videos');
-  
   const video = $('<div>').addClass('video');
   video.attr('id', v.id.videoId);
   const thumbnail = $('<img>').addClass('video-thumb').attr('src', v.snippet.thumbnails.medium.url);

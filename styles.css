@@ -9,7 +9,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100%;
 }
 
 input {
@@ -27,11 +27,13 @@ input {
 #buttons {
   color: #fff;
   text-align: center;
+
 }
 
 #login-container {
   text-align: center;
   color: #fff;
+
 }
 
 #login-link {
@@ -107,6 +109,7 @@ input {
 
 .search-result-header {
   margin: 0;
+  color: #fff;
 }
 
 .search-msg {
