@@ -134,7 +134,7 @@ input {
   margin-right: 8px;
 }
 
-.chat-msg-content{
+.chat-msg-content, .search-msg-content{
   flex-grow: 1;
 }
 
@@ -160,6 +160,11 @@ input {
   color: #fff;
   padding: 16px 8px;
   margin: 0;
+}
 
+.chat-messages {
+  height: 75vh;
+  overflow: scroll;
+  padding: 8px;
 }
 

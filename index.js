@@ -1,5 +1,3 @@
-let chatData = [];
-
 $().ready(() => {
   $('#buttons').hide();
 });
@@ -27,60 +25,58 @@ function getVideos() {
       buildVideo(v);
     })
   });
-
 }
 
-//get the chat for a specific video
+//get the chat for a specific video and stores in, in memory db
 function getLiveChat(videoId) {
-
-  const requestId = gapi.client.youtube.videos.list({
-    id: videoId,
-    part: "liveStreamingDetails"
-  });
-
-  requestId.execute(response => {
-    const video = response.items[0];
-    const requestChat = gapi.client.youtube.liveChatMessages.list({
-      liveChatId: video.liveStreamingDetails.activeLiveChatId,
-      part: "snippet"
+    const requestId = gapi.client.youtube.videos.list({
+      id: videoId,
+      part: "liveStreamingDetails"
     });
-    requestChat.execute(response => {
-      response.items.forEach((item, i) => {
-        chatData.push(item.snippet)
+  
+    requestId.execute(response => {
+      const video = response.items[0];
+      const requestChat = gapi.client.youtube.liveChatMessages.list({
+        liveChatId: video.liveStreamingDetails.activeLiveChatId,
+        part: "snippet"
       });
-      response.items.forEach((item, i) => {
-        const requestChannelName = gapi.client.youtube.channels.list({
-          id: item.snippet.authorChannelId,
-          part: "snippet"
+      requestChat.execute(response => {
+        console.log(response);
+        response.items.forEach((item, i) => {
+          chatData.push(item.snippet)
         });
-        requestChannelName.execute(response => {
-          chatData[i].channelName = response.items[0].snippet.title;
+        response.items.forEach((item, i) => {
+          const requestChannelName = gapi.client.youtube.channels.list({
+            id: item.snippet.authorChannelId,
+            part: "snippet"
+          });
+          requestChannelName.execute(response => {
+            chatData[i].channelName = response.items[0].snippet.title;
+          });
         });
+        console.log(chatData[1]);
       });
-      console.log(chatData[1]);
     });
-  });
 }
 
 function buildChat(chat) {
+  
   let chatContainer = $('<div>').addClass('embed-chat');
   let chatHeader = $('<div>').addClass('chat-header');
   let headerTitle = $('<h2>').addClass('chat-title').text('Live Chat');
   let msgContainer = $('<div>').addClass('chat-messages');
-
+  msgContainer.empty();
   chatContainer.append(chatHeader);
   chatContainer.append(msgContainer);
   chatHeader.append(headerTitle);
-
-  
   
   chat.forEach(msg => {
-    console.log(msg.channelName);
     
-
     let message = $('<div>').addClass('chat-msg');
     let channel = $('<span>').addClass('chat-channel-name');
-    channel.text(msg.channelName);
+    channel.text(msg.channelName + ':');
+    let hex = `#${Math.floor(Math.random()*16777215).toString(16)}`
+    channel.css('color', hex);
     let timestamp = $('<time>').addClass('chat-msg-timestamp');
     let date = new Date(msg.publishedAt);
     let hour = date.getHours();
@@ -90,12 +86,16 @@ function buildChat(chat) {
     let msgContent = $('<span>').addClass('chat-msg-content');
     msgContent.text(msg.displayMessage);
 
-    message.append(channel)
-      .append(msgContent)
+    msgContent.prepend(channel);
+
+    message.append(msgContent)
       .append(timestamp);
 
-    msgContainer.prepend(message);
+    msgContainer.append(message);
+
+   
   });
+  
 
   $('#live-video').append(chatContainer);
 }
@@ -104,6 +104,7 @@ function handleClick(video) {
   $('#all-videos').hide();
   $('#buttons').hide();
   $('#live-video').show();
+  let = chatData = [];
 
   let frameContainer = $('<div>').addClass('embed-video');
   let frame = $('<iframe>').attr('src', `https://www.youtube.com/embed/${video.id.videoId}?autoplay=1`);
@@ -116,8 +117,14 @@ function handleClick(video) {
 
   frameContainer.append(frame);
   frameContainer.append(vidTitle);
-  
-  getLiveChat(video.id.videoId);
+ 
+  // setInterval(() => {
+    getLiveChat(video.id.videoId);
+    setTimeout(() => {
+      buildChat(chatData);
+      $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
+    }, 1500);
+  // }, 3000);
 
   const back = $('<button>').addClass('back-btn')
     .text('Back');
@@ -134,6 +141,7 @@ function handleClick(video) {
 
   searchInput.on('keypress', (e) => {
     if(e.key === 'Enter') { 
+      $('#chat-search').empty();
       let searchResults = chatData.filter(message => message.channelName === e.target.value);
       buildSearchResult(searchResults);
     }
