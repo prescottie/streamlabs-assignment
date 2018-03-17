@@ -30,42 +30,8 @@ function getVideos() {
 
 }
 
+//get the chat for a specific video
 function getLiveChat(videoId) {
-  // fetch(`https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&id=${videoId}&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
-  //   headers: {
-  //     "Accept": "application/json"
-  //   },
-  //   method: 'GET'
-  // }).then(response => response.json())
-  // .then(video => {
-  //   const v = video.items[0];
-  //   const chatId = v.liveStreamingDetails.activeLiveChatId;
-    
-  //   fetch(`https://www.googleapis.com/youtube/v3/liveChat/messages?liveChatId=${chatId}&part=snippet&fields=items(snippet(authorChannelId%2CdisplayMessage%2CpollEditedDetails%2CpollOpenedDetails%2CpollVotedDetails%2CpublishedAt%2CsuperChatDetails%2CtextMessageDetails%2Ctype%2CuserBannedDetails))&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
-  //     headers: {
-  //       "Accept": "application/json"
-  //     },
-  //     method: 'GET'
-  //   }).then(response => response.json())
-  //   .then(chat => {
-  //     chat.items.forEach(item => {
-  //       chatData.push(item.snippet);
-  //     })
-  //     chat.items.forEach((item,i) => {
-  //       fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${item.snippet.authorChannelId}&fields=items(id%2Csnippet%2Ftitle)&key=AIzaSyCgi2Ml11DAKwyLeG4Etg3KwVCWSt6Gqtg`, {
-  //         headers: {
-  //           "Accept": "application/json"
-  //         },
-  //         method: 'GET'
-  //       }).then(response => response.json())
-  //       .then(channel => {
-  //         chatData[i].channelName = channel.items[0].snippet.title;
-  //       })
-  //     })
-  //     console.log(chatData[0]);
-      
-  //   })
-  // })
 
   const requestId = gapi.client.youtube.videos.list({
     id: videoId,
@@ -79,8 +45,8 @@ function getLiveChat(videoId) {
       part: "snippet"
     });
     requestChat.execute(response => {
-      response.items.forEach(item => {
-        chatData.push(item.snippet);
+      response.items.forEach((item, i) => {
+        chatData.push(item.snippet)
       });
       response.items.forEach((item, i) => {
         const requestChannelName = gapi.client.youtube.channels.list({
@@ -90,40 +56,68 @@ function getLiveChat(videoId) {
         requestChannelName.execute(response => {
           chatData[i].channelName = response.items[0].snippet.title;
         });
-      })
+      });
       console.log(chatData[1]);
-      
-
-      // buildChat(response.items);
-    })
-  })
+    });
+  });
 }
 
 function buildChat(chat) {
+  let chatContainer = $('<div>').addClass('embed-chat');
+  let chatHeader = $('<div>').addClass('chat-header');
+  let headerTitle = $('<h2>').addClass('chat-title').text('Live Chat');
+  let msgContainer = $('<div>').addClass('chat-messages');
 
+  chatContainer.append(chatHeader);
+  chatContainer.append(msgContainer);
+  chatHeader.append(headerTitle);
+
+  
+  
+  chat.forEach(msg => {
+    console.log(msg.channelName);
+    
+
+    let message = $('<div>').addClass('chat-msg');
+    let channel = $('<span>').addClass('chat-channel-name');
+    channel.text(msg.channelName);
+    let timestamp = $('<time>').addClass('chat-msg-timestamp');
+    let date = new Date(msg.publishedAt);
+    let hour = date.getHours();
+    let min = date.getMinutes();
+    if (min < 10) {min = "0" + min};
+    timestamp.text(hour + ':' + min);
+    let msgContent = $('<span>').addClass('chat-msg-content');
+    msgContent.text(msg.displayMessage);
+
+    message.append(channel)
+      .append(msgContent)
+      .append(timestamp);
+
+    msgContainer.prepend(message);
+  });
+
+  $('#live-video').append(chatContainer);
 }
 
-function handleClick(videoId) {
+function handleClick(video) {
   $('#all-videos').hide();
   $('#buttons').hide();
   $('#live-video').show();
 
   let frameContainer = $('<div>').addClass('embed-video');
-  let frame = $('<iframe>').attr('src', `https://www.youtube.com/embed/${videoId}?autoplay=1`);
+  let frame = $('<iframe>').attr('src', `https://www.youtube.com/embed/${video.id.videoId}?autoplay=1`);
     frame.attr('allowfullscreen');
     frame.attr('frameborder', '0');
-    frame.width(560);
-    frame.height(315);
-  frameContainer.append(frame);
+    frame.width(825);
+    frame.height(475);
 
-  let chatContainer = $('<div>').addClass('embed-chat');
-  let chat = $('<iframe>').attr('src', `https://www.youtube.com/live_chat?v=${videoId}&embed_domain=streamingvideoapp.s3-website-us-west-2.amazonaws.com`);
-    chat.width(480);
-    chat.height(315);
-    chat.attr('frameborder', '0');
-  chatContainer.append(chat)
+  let vidTitle = $('<h2>').addClass('embed-video-title').text(video.snippet.title);
+
+  frameContainer.append(frame);
+  frameContainer.append(vidTitle);
   
-  getLiveChat(videoId);
+  getLiveChat(video.id.videoId);
 
   const back = $('<button>').addClass('back-btn')
     .text('Back');
@@ -147,7 +141,7 @@ function handleClick(videoId) {
    chatSearch.append(searchInput);
 
   $('#live-video').append(frameContainer)
-    .append(chatContainer)
+    // .append(chatContainer)
     .append(chatSearch)
     .append(back);
   
@@ -181,15 +175,11 @@ function buildSearchResult(searchResults) {
 
 function buildVideo(v) {
   const video = $('<div>').addClass('video');
-  video.attr('id', v.id.videoId);
   const thumbnail = $('<img>').addClass('video-thumb').attr('src', v.snippet.thumbnails.medium.url);
   const title = $('<span>').addClass('video-title').text(v.snippet.title);
   video.on('click', () => {
-    const target = $(event.target).parent()[0];
-    const videoId = $(target).attr('id');
-    console.log(videoId);
     
-    handleClick(videoId);
+    handleClick(v);
   })
   video.append(thumbnail).append(title);
   $('#all-videos').append(video);

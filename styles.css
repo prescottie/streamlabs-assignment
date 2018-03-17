@@ -6,10 +6,6 @@ input, button {outline: none;}
 
 body {
   background: #37474f;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
 }
 
 input {
@@ -21,7 +17,7 @@ input {
 }
 
 .container {
-  padding: 48px 24px;
+  padding: 48px 0;
 }
 
 #buttons {
@@ -94,17 +90,24 @@ input {
   display: flex;
   flex-wrap: wrap;
   margin: 40px;
+  position: relative;
 }
 
-.embed-video, .embed-chat {
-  width: 50%;
+.embed-video {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+}
+
+.embed-video-title {
+  color: #fff;
 }
 
 #chat-search {
-  padding: 8px;
   width: 100%;
+}
+
+#chat-search input {
+  margin: 0;
 }
 
 .search-result-header {
@@ -112,14 +115,27 @@ input {
   color: #fff;
 }
 
-.search-msg {
+.search-msg, .chat-msg {
   margin: 8px;
   color: #fff;
+  display: flex;
+  align-items: center;
 }
 
-.search-msg-timestamp {
+.search-msg-timestamp, .chat-msg-timestamp {
   margin-right: 8px;
   color: #ccc;
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.chat-channel-name {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.chat-msg-content{
+  flex-grow: 1;
 }
 
 .back-btn {
@@ -128,7 +144,22 @@ input {
   font-size: 18px;
   background: #9267ff;
   color: #fff;
-  margin: 8px;
+  margin-top: 24px;
   border-radius: 50px;
+}
+
+.embed-chat {
+  position: absolute;
+  right: 0;
+  width: 33%;
+  background: #444;
+}
+
+.chat-title {
+  background: #9267ff;
+  color: #fff;
+  padding: 16px 8px;
+  margin: 0;
+
 }
 
