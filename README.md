@@ -11,3 +11,7 @@ A webapp for joining youtube live video's and searching chat by usernames
     - if developing locally add http://localhost:8000 to Authorized JavaScript Origins
 6. Run ```python -m SimpleHTTPServer 8000```
 7. Go to http://localhost:8000
+
+## Dependencies
+1. npm 5.7.1
+2. python > 2.3 or higher
