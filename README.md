@@ -1,7 +1,7 @@
 # Youtube LiveChat
 A webapp for joining youtube live video's and searching chat by usernames
 
-##Getting Started
+## Getting Started
 1. Fork and clone repo
 2. Run ```npm i``` to download dependencies
 3. Create a new Poject from the google API dashboard
