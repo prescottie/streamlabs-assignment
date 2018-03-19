@@ -145,13 +145,13 @@ function handleClick(video) {
     });
 
   const chatSearch = $('<div>').attr('id', 'chat-search')
-  const searchHeader = $('<h4>').addClass('search-header').text('Search Messages by Username');
+  const searchHeader = $('<h4>').addClass('search-header').text('Search Live Chat by Username');
   const searchInput = $('<input>').addClass('search-input')
   searchInput.attr('placeholder', 'Enter Username');
 
   searchInput.on('keypress', (e) => {
     if(e.key === 'Enter') { 
-      $('#chat-search').empty();
+      $('.search-results').empty();
       let searchResults = chatData.filter(message => message.channelName === e.target.value);
       buildSearchResult(searchResults);
     }
