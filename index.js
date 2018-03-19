@@ -31,31 +31,40 @@ function getVideos() {
 function getLiveChat(videoId) {
     const requestId = gapi.client.youtube.videos.list({
       id: videoId,
-      part: "liveStreamingDetails"
+      part: "liveStreamingDetails",
     });
   
     requestId.execute(response => {
       const video = response.items[0];
       const requestChat = gapi.client.youtube.liveChatMessages.list({
         liveChatId: video.liveStreamingDetails.activeLiveChatId,
-        part: "snippet"
+        part: "snippet",
+        pageToken: chatData[0] ? chatData[0].nextPageToken : ""
       });
       requestChat.execute(response => {
         console.log(response);
         response.items.forEach((item, i) => {
-          chatData.push(item.snippet)
+          chatData.unshift(item.snippet);
+          chatData[0].nextPageToken = response.nextPageToken;
+          chatData[0].pollingIntervalMillis = response.pollingIntervalMillis;
+          
         });
+
         response.items.forEach((item, i) => {
           const requestChannelName = gapi.client.youtube.channels.list({
             id: item.snippet.authorChannelId,
             part: "snippet"
           });
-          requestChannelName.execute(response => {
-            chatData[i].channelName = response.items[0].snippet.title;
+          requestChannelName.execute(res => {
+            console.log(res.items[0]);
+            
+            chatData[i].channelName = res.items[0].snippet.title;
+            chatData[i].avatar = res.items[0].snippet.thumbnails.default.url;
+            chatData[i].nameColor = `#${Math.floor(Math.random()*16777215).toString(16)}`
           });
         });
-        console.log(chatData[1]);
-      });
+     
+      }); 
     });
 }
 
@@ -71,12 +80,12 @@ function buildChat(chat) {
   chatHeader.append(headerTitle);
   
   chat.forEach(msg => {
-    
     let message = $('<div>').addClass('chat-msg');
+    let avatar = $('<img>').addClass('chat-msg-avatar');
+    avatar.attr('src', msg.avatar);
     let channel = $('<span>').addClass('chat-channel-name');
     channel.text(msg.channelName + ':');
-    let hex = `#${Math.floor(Math.random()*16777215).toString(16)}`
-    channel.css('color', hex);
+    channel.css('color', msg.nameColor);
     let timestamp = $('<time>').addClass('chat-msg-timestamp');
     let date = new Date(msg.publishedAt);
     let hour = date.getHours();
@@ -87,16 +96,13 @@ function buildChat(chat) {
     msgContent.text(msg.displayMessage);
 
     msgContent.prepend(channel);
-
+    
     message.append(msgContent)
+      .prepend(avatar)
       .append(timestamp);
 
-    msgContainer.append(message);
-
-   
+    msgContainer.prepend(message);
   });
-  
-
   $('#live-video').append(chatContainer);
 }
 
@@ -118,13 +124,15 @@ function handleClick(video) {
   frameContainer.append(frame);
   frameContainer.append(vidTitle);
  
-  // setInterval(() => {
+  let polling = chatData[0] ? (chatData[0].pollingIntervalMillis + 300) : 3000;
+
+  setInterval(() => {
     getLiveChat(video.id.videoId);
     setTimeout(() => {
       buildChat(chatData);
       $('.chat-messages').scrollTop($('.chat-messages')[0].scrollHeight);
     }, 1500);
-  // }, 3000);
+  }, 10000);
 
   const back = $('<button>').addClass('back-btn')
     .text('Back');
@@ -133,9 +141,11 @@ function handleClick(video) {
       $('#buttons').show();
       $('#live-video').hide();
       $('#all-videos').show();
+      chatData = [];
     });
 
   const chatSearch = $('<div>').attr('id', 'chat-search')
+  const searchHeader = $('<h4>').addClass('search-header').text('Search Messages by Username');
   const searchInput = $('<input>').addClass('search-input')
   searchInput.attr('placeholder', 'Enter Username');
 
@@ -146,10 +156,10 @@ function handleClick(video) {
       buildSearchResult(searchResults);
     }
    })
+   chatSearch.append(searchHeader);
    chatSearch.append(searchInput);
 
   $('#live-video').append(frameContainer)
-    // .append(chatContainer)
     .append(chatSearch)
     .append(back);
   
@@ -160,6 +170,8 @@ function buildSearchResult(searchResults) {
   const header = $('<h4>').addClass('search-result-header');
   header.text(`${searchResults[0].channelName} has contributed ${searchResults.length} messages.`);
   searchResult.append(header);
+
+  header.css('color', searchResults[0].nameColor);
 
   searchResults.forEach(result => {
     const msg = $('<div>').addClass('search-msg');

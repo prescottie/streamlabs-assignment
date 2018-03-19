@@ -110,6 +110,10 @@ input {
   margin: 0;
 }
 
+.search-header {
+  color: #32c3a2;
+}
+
 .search-result-header {
   margin: 0;
   color: #fff;
@@ -131,11 +135,12 @@ input {
 
 .chat-channel-name {
   font-weight: 500;
-  margin-right: 8px;
+  margin: 0 8px;
 }
 
 .chat-msg-content, .search-msg-content{
   flex-grow: 1;
+  padding: 0 4px;
 }
 
 .back-btn {
@@ -166,5 +171,12 @@ input {
   height: 75vh;
   overflow: scroll;
   padding: 8px;
+}
+
+.chat-msg-avatar {
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  align-self: flex-start;
 }
 
